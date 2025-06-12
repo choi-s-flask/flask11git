@@ -1,44 +1,43 @@
-from flask import Flask
-from datetime import datetime
-import enum
-from sqlalchemy import SQLAlchemy
+from flask import Blueprint, request, jsonify
+from sqlalchemy.exc import IntegrityError
+from app.models import User, db
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+users_blp = Blueprint('users', __name__)
 
-db = SQLAlchemy(app)
+@users_blp.route('/', methods=['GET'])
+def connect():
+    return jsonify({"message": "Success Connect"})
 
-class Gender(enum.Enum):
-    male ='male'
-    female ='female'
+@users_blp.route('/signup', methods=['POST'])
+def signup_page():
+    data = request.get_json()
+    #필수 항목 확인
+    required_fields =['name', 'email', 'age', 'gender']
+    missing = [field for field in required_fields if field not in data]
 
-class User(db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(10), nullable=False)
-    age = db.Column(
-        db.Enum(
-        'teen',
-        'twenty',
-        'thirty',
-        'forty',
-        'fifty',
-        name='age_enum'
-    ),
-    nullable=False
+    if missing:
+            return jsonify({
+                    "message": f"다음 항목이 누락되었습니다: {', '.join(missing)}"
+            }), 400
+    # 이메일 중복 체크
+    existing_user = User.query.filter_by(email=data['email']).first()
+    if existing_user:
+            return jsonify({
+                    "message": "이미 등록된 이메일입니다"
+            }), 400
+    # 회원 생성
+    user =User(
+
+    name = data['name'],
+    email = data['email'],
+    age = data['age'],
+    gender = data['gender'],
     )
-    gender = db.Column(db.Enum(Gender.male,Gender.female,name='gender_enum'), nullable=False)
-    email = db.Column(db.String(120), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    db.session.add(user)
+    db.session.commit()
 
+    return jsonify({
+        "message": f"{user.name}님 회원가입을 축하드립니다",
+        "user_id": user.id
+    }), 201
 
-
-
-
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
