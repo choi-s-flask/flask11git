@@ -4,9 +4,9 @@ from flask_smorest import Blueprint
 from app.models import Answer
 from config import db
 
-answers_blp = Blueprint('answers', __name__, url_prefix='/answers')
+answers_blp = Blueprint('answers', __name__)
 
-@answers_blp.route('', methods=['POST'])
+@answers_blp.route('/sumbit', methods=['POST'])
 def create_answer():
     data = request.get_json()
 
@@ -25,7 +25,7 @@ def create_answer():
     return jsonify({"message": "답변이 저장되었습니다."}), 201
 
 
-@answers_blp.route('/<int:user_id>', methods=['GET'])
+@answers_blp.route('/answers/<int:user_id>', methods=['GET'])
 def get_answers(user_id):
     answers = Answer.query.filter_by(user_id=user_id).all()
     results = []

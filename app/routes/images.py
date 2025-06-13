@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Blueprint
+from flask import jsonify, request, Blueprint
 from app.models import Image
 from config import db
 
@@ -15,7 +15,7 @@ def get_main_image():
     return jsonify({"image": main_image.url}), 200
 
 
-@images_blp.route("", methods=["POST"])
+@images_blp.route('', methods=["POST"])
 def create_image():
     try:
         data = request.get_json()
