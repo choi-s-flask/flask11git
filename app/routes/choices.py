@@ -7,16 +7,21 @@ from sqlalchemy.orm import joinedload
 choices_blp = Blueprint('choices', __name__) # url_prefix 제거됨
 
 # [예시] 특정 question_id에 해당하는 choice 목록 + 이미지 포함
-@choices_blp.route('/question/<int:question_id>', methods=['GET'])
-def get_choices_by_question(question_id):
-    question = Question.query.options(joinedload(Question.choices)).filter_by(id=question_id).first()
+@choices_blp.route('/question/<int:question_sqe>', methods=['GET'])
+def get_choices_by_question(question_sqe):
+    question = Question.query.filter_by(id=question_sqe, is_active=True).first()
     if not question:
         return jsonify({'error': 'Question not found'}), 404
 
+    choice_list = (
+        Choices.query.filter_by(question_id=question.id, is_active=True)
+        .order_by(Choices.sqe)
+        .all()
+    )
     return jsonify({
-        'question': question.text, # 질문 텍스트
-        'image': question.image_url, # 질문 이미지 URL
-        'choices': [choice.to_dict() for choice in question.choices]
+        'question': question.title, # 질문 텍스트
+        'image': question.image_id, # 질문 이미지 URL
+        'choices': [choice.to_dict() for choice in choice_list]
         }
     )
 

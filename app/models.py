@@ -58,7 +58,7 @@ class Question(CommonModel):
     image_id = db.Column(db.Integer, db.ForeignKey('images.id'), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     sqe = db.Column(db.Integer, nullable=False)
-    is_active = db.Column(db.Boolean, nullable=False)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     def to_dict(self):
         return {
@@ -76,9 +76,18 @@ class Choices(CommonModel):
     question_id = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False)
     content = db.Column(db.String(255), nullable=False)
     sqe = db.Column(db.Integer, nullable=False)
-    is_active = db.Column(db.Boolean, nullable=False)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
     # created_at = db.Column(db.DateTime, default=datetime.utcnow)
     # updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "content": self.content,
+            "is_active": self.is_active,
+            "sqe": self.sqe,
+            "question_id": self.question_id,
+        }
 
 class Answer(CommonModel):
     __tablename__ = 'answers'
