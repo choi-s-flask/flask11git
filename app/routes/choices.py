@@ -1,9 +1,10 @@
-# choices.py
+# app/routes/choices.py
 from flask import Blueprint, request, jsonify
 from app.models import db, Choice, Question  # 모델 임포트
 from sqlalchemy.orm import joinedload
 
-bp = Blueprint('choices', __name__, url_prefix='/choices')
+# Blueprint 정의: url_prefix는 __init__.py에서 처리
+bp = Blueprint('choices', __name__) # url_prefix 제거됨
 
 # [예시] 특정 question_id에 해당하는 choice 목록 + 이미지 포함
 @bp.route('/question/<int:question_id>', methods=['GET'])
@@ -13,8 +14,8 @@ def get_choices_by_question(question_id):
         return jsonify({'error': 'Question not found'}), 404
 
     return jsonify({
-        'question': question.text,
-        'image': question.image_url,
+        'question': question.text, # 질문 텍스트
+        'image': question.image_url, # 질문 이미지 URL
         'choices': [choice.to_dict() for choice in question.choices]
         }
     )
@@ -36,8 +37,9 @@ def get_choice_detail(choice_id):
 def create_choice():
     data = request.get_json()
 
-    if not data or 'text' not in data or 'question_id' not in data:
-        return jsonify({"message": "Missing 'text' or 'question_id' in request body"}), 400
+    # 필수 필드: content, question_id, sqe (sqe는 순서)
+    if not data or 'content' not in data or 'question_id' not in data or 'sqe' not in data:
+        return jsonify({"message": "Missing 'content', 'question_id', or 'sqe' in request body"}), 400
 
     question = Question.query.get(data['question_id'])
     if not question:
@@ -45,9 +47,10 @@ def create_choice():
 
     try:
         new_choice = Choice(
-            text=data['text'],
+            content=data['content'], # 'text' 대신 'content'
             question_id=data['question_id'],
-            is_correct=data.get('is_correct', False)
+            is_active=data.get('is_active', True), # 'is_correct' 대신 'is_active', 기본값 True
+            sqe=data['sqe'] # 순서 필드 추가
         )
 
         db.session.add(new_choice)
@@ -68,10 +71,12 @@ def update_choice(choice_id):
         return jsonify({"message": "No data provided for update"}), 400
 
     try:
-        if 'text' in data:
-            choice.text = data['text']
-        if 'is_correct' in data:
-            choice.is_correct = data['is_correct']
+        if 'content' in data: # 'text' 대신 'content'
+            choice.content = data['content']
+        if 'is_active' in data: # 'is_correct' 대신 'is_active'
+            choice.is_active = data['is_active']
+        if 'sqe' in data: # 'sqe' 필드 업데이트
+            choice.sqe = data['sqe']
         if 'question_id' in data:
             question = Question.query.get(data['question_id'])
             if not question:
