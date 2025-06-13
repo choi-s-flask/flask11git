@@ -1,13 +1,13 @@
 # app/routes/choices.py
 from flask import Blueprint, request, jsonify
-from app.models import db, Choice, Question  # 모델 임포트
+from app.models import db, Choices, Question  # 모델 임포트
 from sqlalchemy.orm import joinedload
 
 # Blueprint 정의: url_prefix는 __init__.py에서 처리
-bp = Blueprint('choices', __name__) # url_prefix 제거됨
+choices_blp = Blueprint('choices', __name__) # url_prefix 제거됨
 
 # [예시] 특정 question_id에 해당하는 choice 목록 + 이미지 포함
-@bp.route('/question/<int:question_id>', methods=['GET'])
+@choices_blp.route('/question/<int:question_id>', methods=['GET'])
 def get_choices_by_question(question_id):
     question = Question.query.options(joinedload(Question.choices)).filter_by(id=question_id).first()
     if not question:
@@ -21,19 +21,19 @@ def get_choices_by_question(question_id):
     )
 
 # 1. 모든 선택지 조회 (GET /choices/)
-@bp.route('/', methods=['GET'])
+@choices_blp.route('/', methods=['GET'])
 def get_all_choices():
-    choices = Choice.query.all()
+    choices = Choices.query.all()
     return jsonify([choice.to_dict() for choice in choices])
 
 # 2. 특정 선택지 상세 조회 (GET /choices/<int:choice_id>)
-@bp.route('/<int:choice_id>', methods=['GET'])
+@choices_blp.route('/<int:choice_id>', methods=['GET'])
 def get_choice_detail(choice_id):
-    choice = Choice.query.get_or_404(choice_id)
+    choice = Choices.query.get_or_404(choice_id)
     return jsonify(choice.to_dict())
 
 # 3. 새로운 선택지 생성 (POST /choices/)
-@bp.route('/', methods=['POST'])
+@choices_blp.route('/', methods=['POST'])
 def create_choice():
     data = request.get_json()
 
@@ -46,7 +46,7 @@ def create_choice():
         return jsonify({"message": "Question with provided ID not found"}), 404
 
     try:
-        new_choice = Choice(
+        new_choice = Choices(
             content=data['content'], # 'text' 대신 'content'
             question_id=data['question_id'],
             is_active=data.get('is_active', True), # 'is_correct' 대신 'is_active', 기본값 True
@@ -62,9 +62,9 @@ def create_choice():
 
 
 # 4. 선택지 업데이트 (PUT /choices/<int:choice_id>)
-@bp.route('/<int:choice_id>', methods=['PUT'])
+@choices_blp.route('/<int:choice_id>', methods=['PUT'])
 def update_choice(choice_id):
-    choice = Choice.query.get_or_404(choice_id)
+    choice = Choices.query.get_or_404(choice_id)
     data = request.get_json()
 
     if not data:
@@ -91,9 +91,9 @@ def update_choice(choice_id):
 
 
 # 5. 선택지 삭제 (DELETE /choices/<int:choice_id>)
-@bp.route('/<int:choice_id>', methods=['DELETE'])
+@choices_blp.route('/<int:choice_id>', methods=['DELETE'])
 def delete_choice(choice_id):
-    choice = Choice.query.get_or_404(choice_id)
+    choice = Choices.query.get_or_404(choice_id)
     try:
         db.session.delete(choice)
         db.session.commit()

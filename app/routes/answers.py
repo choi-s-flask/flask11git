@@ -4,7 +4,7 @@ from flask_smorest import Blueprint
 from app.models import Answer
 from config import db
 
-answers_blp = Blueprint('answers', __name__, url_prefix='/answers', description='Operations on answers')
+answers_blp = Blueprint('answers', __name__, url_prefix='/answers')
 
 @answers_blp.route('', methods=['POST'])
 def create_answer():

@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, Blueprint
 from app.models import Image
 from config import db
 
-images_blp = Blueprint('images', __name__, url_prefix='/images', description='Operations on images')
+images_blp = Blueprint('images', __name__, url_prefix='/images')
 
 
 @images_blp.route("/main", methods=["GET"])

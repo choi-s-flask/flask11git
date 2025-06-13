@@ -1,7 +1,5 @@
-from models.question import Question
-from flask import Blueprint, jsonify, request
-from models.choices import Choice
-from models.image import Image
+from app.models import Question, Choices, Image
+from flask import Blueprint, request, jsonify
 from config import db
 
 questions_blp = Blueprint('questions', __name__)
@@ -40,7 +38,7 @@ def get_question(question_sqe):
         return jsonify({"error": "존재하지않는 질문입니다" }), 404
     
 
-    choice_list = (Choice.query.filter_by(question_id=question.id, is_active=True).order_by(Choice.sqe)
+    choice_list = (Choices.query.filter_by(question_id=question.id, is_active=True).order_by(Choices.sqe)
     .all()
     )
     image = Image.query.get(question.image_id)
