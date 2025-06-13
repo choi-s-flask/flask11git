@@ -50,31 +50,24 @@ class Image(CommonModel):
     # created_at = db.Column(db.DateTime, default=datetime.utcnow)
     # updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    class Question(CommonModel):
-        __tablename__ = 'questions'
 
-        id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-        image_id = db.Column(db.Integer, db.ForeignKey('images.id'), nullable=False)
-        title = db.Column(db.String(100), nullable=False)
-        sqe = db.Column(db.Integer, nullable=False)
-        is_active = db.Column(db.Boolean, nullable=False)
-
-        def to_dict(self):
-            return {
-                'id': self.id,
-                'image_id': self.image_id,
-                'title': self.title,
-                'sqe': self.sqe,
-                'is_active': self.is_active,
-            }
+class Question(CommonModel):
+    __tablename__ = 'questions'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     image_id = db.Column(db.Integer, db.ForeignKey('images.id'), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     sqe = db.Column(db.Integer, nullable=False)
     is_active = db.Column(db.Boolean, nullable=False)
-    # created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    # updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'image_id': self.image_id,
+            'title': self.title,
+            'sqe': self.sqe,
+            'is_active': self.is_active,
+        }
 
 class Choices(CommonModel):
     __tablename__ = 'choices'
@@ -95,6 +88,3 @@ class Answer(CommonModel):
     choice_id = db.Column(db.Integer, db.ForeignKey('choices.id'), nullable=False)
     # created_at = db.Column(db.DateTime, default=datetime.utcnow)
     # updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-
-
