@@ -4,7 +4,7 @@ from config import db
 
 questions_blp = Blueprint('questions', __name__)
 
-@questions_blp.route('/questions', methods=['POST'])
+@questions_blp.route('/question', methods=['POST'])
 def create_question():
 
     
@@ -30,7 +30,9 @@ def create_question():
             }), 201
         except KeyError as e:
             return jsonify({"message": f"Missing required field: {str(e)}"}), 400
-@questions_blp.route('/question/<int:question_id>', methods=['GET'])
+
+
+@questions_blp.route('/questions/<int:question_sqe>', methods=['GET'])
 def get_question(question_sqe):
     question = Question.query.filter_by(sqe=question_sqe, is_active=True).first()
 
@@ -54,6 +56,6 @@ def get_question(question_sqe):
 @questions_blp.route('/questions/count', methods=['GET'])
 def get_question_count():
         count = Question.query.filter_by(is_active=True).count()
-        return jsonify({"count":count})
+        return jsonify({"total":count})
 
 
