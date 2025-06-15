@@ -1,9 +1,14 @@
 from flask import Blueprint, request, jsonify
 from app.models import User, db
 
-user_blp = Blueprint("user", __name__)
+users_blp = Blueprint("user", __name__)
 
-@user_blp.route("/signup", methods=["POST"])
+@users_blp.route("/", methods=["GET"])
+def connect():
+    return jsonify({"message": "Success Connect"})
+
+
+@users_blp.route("/signup", methods=["POST"])
 def signup_page():
     try:
         data = request.get_json()
