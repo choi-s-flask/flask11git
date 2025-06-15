@@ -4,36 +4,30 @@ from flask_smorest import Blueprint
 from app.models import Answer
 from config import db
 
-answers_blp = Blueprint('answers', __name__, url_prefix='/answers')
+answers_blp = Blueprint('answers', __name__)
 
-@answers_blp.route('', methods=['POST'])
-def create_answer():
-    data = request.get_json()
+@answers_blp.route("/submit", methods=["POST"])
+def submit_answer():
+    try:
+        data_list = request.get_json()  # 한 번만 호출
 
-    # 필수 데이터 체크 (user_id, choice_id)
-    user_id = data.get('user_id')
-    choice_id = data.get('choice_id')
+        for data in data_list:
+            answer = Answer(
+                user_id=data["user_id"],
+                choice_id=data["choice_id"],
+            )
+            db.session.add(answer)
 
-    if not user_id or not choice_id:
-        return jsonify({"error": "user_id와 choice_id가 필요합니다."}), 400
+        db.session.commit()
+        user_id = data_list[0]["user_id"]
 
-    # Answer 객체 생성 후 DB에 저장
-    answer = Answer(user_id=user_id, choice_id=choice_id)
-    db.session.add(answer)
-    db.session.commit()
+        return jsonify(
+            {"message": f"User: {user_id}'s answers Success Create"}
+        ), 201
 
-    return jsonify({"message": "답변이 저장되었습니다."}), 201
+    except KeyError as e:
+        return jsonify({"message": f"Missing required field: {str(e)}"}), 400
 
-
-@answers_blp.route('/<int:user_id>', methods=['GET'])
-def get_answers(user_id):
-    answers = Answer.query.filter_by(user_id=user_id).all()
-    results = []
-
-    for answer in answers:
-        results.append({
-            "answer_id": answer.id,
-            "choice_id": answer.choice_id,
-        })
-
-    return jsonify(results), 200
+    except Exception as e:
+        # 예외 잡아서 디버깅에 도움
+        return jsonify({"message": f"Unexpected error: {str(e)}"}), 500
